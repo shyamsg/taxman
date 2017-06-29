@@ -50,7 +50,7 @@ def parseToRootList(taxids, taxid_to_name, parentDict):
 taxid_to_name = {}
 namesf = open(args.names)
 for line in namesf:
-    toks = line.strip().split()
+    toks = line.strip().split("\t")
     taxid_to_name[int(toks[0])] = toks[2]
 print "Done loading Taxid to name data."
 namesf.close()
