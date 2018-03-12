@@ -20,11 +20,11 @@ if __name__ == "__main__":
         print "Output file", args.output, "already exists. Please delete it if you want to write over it."
         sys.exit(2)
 
-## Define a function to return the path to the root for this 
+## Define a function to return the path to the root for this
 ## node.
 def parseToRoot(taxid, taxid_to_name, parentDict):
     """This function takes a single taxid (integer),
-    processes it to get the path to the root for that 
+    processes it to get the path to the root for that
     taxid, returning the list of names of the different
     nodes."""
     nameString = ""
@@ -54,7 +54,7 @@ for line in namesf:
     taxid_to_name[int(toks[0])] = toks[2]
 print "Done loading Taxid to name data."
 namesf.close()
-    
+
 ## Second, load the parent dict.
 parentDict = {}
 nodesf = open(args.nodes)
@@ -64,9 +64,9 @@ for line in nodesf:
 print "Done load parent data."
 nodesf.close()
 
-## Lastly, make a dictionary to convert GI to taxid 
+## Lastly, make a dictionary to convert GI to taxid
 ## Test that the index file exists, if not,
-## make it. You should never read the gi to taxid file 
+## make it. You should never read the gi to taxid file
 ## since it is going to be incredibly big and impossible
 ## to store in memory.
 gi_to_taxid_index = []
@@ -129,18 +129,18 @@ oldIndex = 0
 oldGI = 0
 for line in GIf:
     toks = line.strip().split()
-    if len(toks) != 1: 
+    if len(toks) != 1:
         print "Ignoring line with incorrect format:", line
         continue
     curGI = int(toks[0])
     ### Given that you have the indexsize
-    ### the last GI with value less than 
-    ### our given GI is just the element 
+    ### the last GI with value less than
+    ### our given GI is just the element
     ### int(givenGI/indexsize)
     curIndex = int(curGI/INDEXSIZE)
-    if curIndex != oldIndex: 
-        ## different partof file, so go 
-        ## to that partof the the gi-to-taxid 
+    if curIndex != oldIndex:
+        ## different partof file, so go
+        ## to that partof the the gi-to-taxid
         ## file
         oldIndex = curIndex
         gitaxf.seek(gi_to_taxid_index[curIndex], 0)
@@ -150,23 +150,23 @@ for line in GIf:
         ## go back to the start of this block.
         gitaxf.seek(gi_to_taxid_index[curIndex], 0)
     ## If neither of the above 2 options, start reading the Gitax
-    ## file till you find our gi, or go to the index of the gi 
+    ## file till you find our gi, or go to the index of the gi
     ## in the gitax file is greater than our curIndex, in which
-    ## case we do not have that gi in our db. 
+    ## case we do not have that gi in our db.
     for gine in gitaxf:
         (gi, tax) = [int(x) for x in gine.strip().split()]
         if int(gi/INDEXSIZE) != curIndex:
+            ## you have parsed this block, and there is no curGI
+            ## so go to the next GI.
             print "Cannot find the GI", curGI, "in the gi to taxonomy file."
-            continue
-        if curGI == gi: 
+            break
+        if curGI == gi:
             nameString = parseToRoot(tax, taxid_to_name, parentDict)
             outf.write(str(gi)+"\t"+nameString+"\n")
             break
     cnt += 1
-    if (cnt%BATCHSIZE == 0): 
+    if (cnt%BATCHSIZE == 0):
         print cnt, "GIs processed from input."
 GIf.close()
 gitaxf.close()
 outf.close()
-
-
