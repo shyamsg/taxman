@@ -51,6 +51,8 @@ taxid_to_name = {}
 namesf = open(args.names)
 for line in namesf:
     toks = line.strip().split("\t")
+    if toks[6] != "scientific name":
+        continue
     taxid_to_name[int(toks[0])] = toks[2]
 print "Done loading Taxid to name data."
 namesf.close()
